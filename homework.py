@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_message(bot, message):
-    """Отправляем сообщение в телеграм"""
+    """Отправляем сообщение в телеграм."""
     chat_id = TELEGRAM_CHAT_ID
     try:
         bot.send_message(chat_id, text=message)
@@ -46,7 +46,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """Делает зпрос к API"""
+    """Делает зпрос к API."""
     timestamp = current_timestamp
     params = {'from_date': timestamp}
     try:
@@ -66,7 +66,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """Проверяем API на корректность"""
+    """Проверяем API на корректность."""
     try:
         homework_list = response['homeworks']
     except KeyError as e:
