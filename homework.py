@@ -79,7 +79,7 @@ def check_response(response):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
     if homework_list is not dict:
-        raise exceptions.IncorrectFormatResponse('Данные не читаемы')
+        raise TypeError('Ответ API отличен от словаря')
     return homework_list
 
 
