@@ -78,26 +78,31 @@ def check_response(response):
     if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
-    if homework_list is not list:
+    if homework_list is not dict:
         raise TypeError('Ответ API отличен от словаря')
     return homework_list
 
 
 def parse_status(homework):
-    """Извлекает статус дз."""
+    """Извлекает из информации о домашке ее статус."""
     try:
         homework_name = homework.get('homework_name')
-    except KeyError as err:
-        logger.error(f'Ошибка доступа по ключу {err}')
+    except KeyError as e:
+        msg = f'Ошибка доступа по ключу homework_name: {e}'
+        logger.error(msg)
     try:
         homework_status = homework.get('status')
-    except KeyError as err:
-        logger.error(f'Ошибка доступа по ключу {err}')
-    if homework_status not in HOMEWORK_STATUSES:
-        logger.error('Неизвестный статус работы')
-        raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
+    except KeyError as e:
+        msg = f'Ошибка доступа по ключу status: {e}'
+        logger.error(msg)
+
     verdict = HOMEWORK_STATUSES[homework_status]
+    if verdict is None:
+        msg = 'Неизвестный статус домашки'
+        logger.error(msg)
+        raise exceptions.nknownStatusHomeWork(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+
 
 
 def check_tokens():
