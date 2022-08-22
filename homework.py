@@ -78,7 +78,7 @@ def check_response(response):
     if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
-    if homework_list is not dict:
+    if homework_list is not list:
         raise TypeError('Ответ API отличен от словаря')
     return homework_list
 
