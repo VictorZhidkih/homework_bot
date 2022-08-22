@@ -65,7 +65,6 @@ def get_api_answer(current_timestamp):
     return response.json()
 
 
-
 def check_response(response):
     """Проверяем API на корректность."""
     try:
@@ -120,7 +119,6 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
-            print(response)
             homework = check_response(response)
             new_status = homework[0].get('status')
             if new_status != STATUS:
