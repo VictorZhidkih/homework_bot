@@ -105,7 +105,7 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = {'from_date':1657971146}
+    current_timestamp = int(time.time() - 604800)
     STATUS = ''
     PRIVIOUS_ERROR = ''
     if not check_tokens():
