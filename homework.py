@@ -1,9 +1,7 @@
 import logging
-from msilib.schema import Error
 import os
 import time
 from http import HTTPStatus
-from urllib import response
 
 import requests
 import telegram
@@ -38,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_message(bot, message):
-    '''Отправляем сообщение в телеграм'''
+    """Отправляем сообщение в телеграм"""
     chat_id = TELEGRAM_CHAT_ID
     try:
         bot.send_message(chat_id, text=message)
