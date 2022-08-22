@@ -116,6 +116,14 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
+        except exceptions.IncorrectAPIResponseException as e:
+            if str(e) != previous_error:
+                previous_error = str(e)
+                send_message(bot, e)
+            logger.error(e)
+            time.sleep(RETRY_TIME)
+            continue
+        try:
             homework = check_response(response)
             new_status = homework[0].get('status')
             if new_status != STATUS:
