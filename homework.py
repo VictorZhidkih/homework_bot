@@ -18,6 +18,7 @@ logging.basicConfig(
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+date_3_days_ago = 1661035614
 
 RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
@@ -64,6 +65,7 @@ def get_api_answer(current_timestamp):
     return response.json()
 
 
+
 def check_response(response):
     """Проверяем API на корректность."""
     try:
@@ -74,8 +76,10 @@ def check_response(response):
     if len(homework_list) == 0:
         logger.error('Список домашних работ пуст')
         raise IndexError('Список домашних работ пуст')
-    if isinstance(homework_list, list):
+    if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
+        raise exceptions.IncorrectFormatResponse('Данные не читаемы')
+    if homework_list is not dict:
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
     return homework_list
 
@@ -105,7 +109,7 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time() - 604800)
+    current_timestamp = int(date_3_days_ago)
     STATUS = ''
     PRIVIOUS_ERROR = ''
     if not check_tokens():
@@ -116,6 +120,7 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
+            print(response)
             homework = check_response(response)
             new_status = homework[0].get('status')
             if new_status != STATUS:
