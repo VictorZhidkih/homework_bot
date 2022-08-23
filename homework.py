@@ -40,9 +40,8 @@ def send_message(bot, message):
     chat_id = TELEGRAM_CHAT_ID
     try:
         bot.send_message(chat_id, text=message)
-        logger.info(f'Сообщение в чат {TELEGRAM_CHAT_ID} отправлено')
     except exceptions.SendMessageFailure:
-        logger.error('Ошибка отправки сообщения в телеграм')
+        raise exceptions.SendMessageFailure('Сообщения не отправлены')
 
 
 def get_api_answer(current_timestamp):
@@ -78,21 +77,19 @@ def check_response(response):
     if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
-    if homework_list is not dict:
-        raise TypeError('Ответ API отличен от словаря')
+    # if not isinstance(homework_list, dict):
+    #     raise TypeError('Ответ API отличен от словаря')
+
     return homework_list
 
 
 def parse_status(homework):
     """Извлекает статус дз."""
-    if 'status' not in homework:
-        logger.error('Недокументированный статус')
-        raise KeyError('Недокументированный статус')
-    if 'homework_name' not in homework:
-        logger.error('Недокументированный статус')
-        raise KeyError('Недокументированный статус')
     try:
         homework_name = homework.get('homework_name')
+    except KeyError as err:
+        logger.error(f'Ошибка доступа по ключу {err}')
+    try:
         homework_status = homework.get('status')
     except KeyError as err:
         logger.error(f'Ошибка доступа по ключу {err}')
@@ -102,20 +99,6 @@ def parse_status(homework):
         raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
     verdict = HOMEWORK_STATUSES[homework_status]
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
-    # try:
-    #     homework_name = homework.get('homework_name')
-    # except KeyError as err:
-    #     logger.error(f'Ошибка доступа по ключу {err}')
-    # try:
-    #     homework_status = homework.get('status')
-    # except KeyError as err:
-    #     logger.error(f'Ошибка доступа по ключу {err}')
-    # if homework_status not in HOMEWORK_STATUSES:
-    #     logger.error('Недокументированный статус
-    # домашней работы в ответе от API')
-    #     raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
-    # verdict = HOMEWORK_STATUSES[homework_status]
-    # return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
@@ -126,9 +109,13 @@ def check_tokens():
 def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    try:
+        logger.info(f'Сообщение в чат {TELEGRAM_CHAT_ID} отправлено')
+    except exceptions.SendMessageFailure as err:
+        logger.error(f'Ошибка{err}отправки сообщения в телеграм')
     current_timestamp = int(date_3_days_ago)
-    STATUS = ''
-    PRIVIOUS_ERROR = ''
+    STATUS = None
+    PRIVIOUS_ERROR = None
     if not check_tokens():
         msg = 'отсутствие обязательных переменных окружения во время '
         logger.critical(msg)
