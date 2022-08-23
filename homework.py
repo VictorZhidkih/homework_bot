@@ -84,24 +84,38 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Извлекает из информации о домашке ее статус."""
+    """Извлекает статус дз."""
+    if 'status' not in homework:
+        logger.error('Недокументированный статус')
+        raise KeyError('Недокументированный статус')
+    if 'homework_name' not in homework:
+        logger.error('Недокументированный статус')
+        raise KeyError('Недокументированный статус')
     try:
         homework_name = homework.get('homework_name')
-    except KeyError as e:
-        msg = f'Ошибка доступа по ключу homework_name: {e}'
-        logger.error(msg)
-    try:
         homework_status = homework.get('status')
-    except KeyError as e:
-        msg = f'Ошибка доступа по ключу status: {e}'
-        logger.error(msg)
-
+    except KeyError as err:
+        logger.error(f'Ошибка доступа по ключу {err}')
+    if homework_status not in HOMEWORK_STATUSES:
+        logger.error('Недокументированный статус '
+                     'домашней работы в ответе от API')
+        raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
     verdict = HOMEWORK_STATUSES[homework_status]
-    if verdict is None:
-        msg = 'Неизвестный статус домашки'
-        logger.error(msg)
-        raise exceptions.nknownStatusHomeWork(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+    # try:
+    #     homework_name = homework.get('homework_name')
+    # except KeyError as err:
+    #     logger.error(f'Ошибка доступа по ключу {err}')
+    # try:
+    #     homework_status = homework.get('status')
+    # except KeyError as err:
+    #     logger.error(f'Ошибка доступа по ключу {err}')
+    # if homework_status not in HOMEWORK_STATUSES:
+    #     logger.error('Недокументированный статус
+    # домашней работы в ответе от API')
+    #     raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
+    # verdict = HOMEWORK_STATUSES[homework_status]
+    # return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
