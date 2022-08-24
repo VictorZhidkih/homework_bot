@@ -92,11 +92,11 @@ def parse_status(homework):
         homework_status = homework.get('status')
     except KeyError as err:
         logger.error(f'Ошибка доступа по ключу {err}')
-    if homework_status not in HOMEWORK_STATUSES and not None:
-        logger.error('Недокументированный статус '
-                     'домашней работы в ответе от API')
-        raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
-    verdict = HOMEWORK_STATUSES.get(homework_status)
+    verdict = HOMEWORK_STATUSES[homework_status]
+    if verdict is None:
+        msg = 'Неизвестный статус домашки'
+        logger.error(msg)
+        raise exceptions.UnknownHWStatusException(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
