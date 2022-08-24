@@ -60,12 +60,13 @@ def get_api_answer(current_timestamp):
     if response.status_code != HTTPStatus.OK:
         logger.error('недоступность эндпоинта')
         raise Exception('недоступность эндпоинта')
-
     return response.json()
 
 
 def check_response(response):
     """Проверяем API на корректность."""
+    if not isinstance(response, dict):
+        raise TypeError('Ответ API отличен от словаря')
     try:
         homework_list = response['homeworks']
     except KeyError as e:
@@ -77,8 +78,6 @@ def check_response(response):
     if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
-    # if not isinstance(homework_list, dict):
-    #     raise TypeError('Ответ API отличен от словаря')
 
     return homework_list
 
@@ -97,7 +96,7 @@ def parse_status(homework):
         logger.error('Недокументированный статус '
                      'домашней работы в ответе от API')
         raise exceptions.UnknownStatusHomeWork('Неизвестный статус работы')
-    verdict = HOMEWORK_STATUSES[homework_status]
+    verdict = HOMEWORK_STATUSES.get(homework_status)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
