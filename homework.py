@@ -18,7 +18,7 @@ logging.basicConfig(
 PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-date_3_days_ago = 1661035614
+date_3_days_ago = 1660987256
 
 RETRY_TIME = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
@@ -65,6 +65,7 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяем API на корректность."""
+    print(response)
     if not isinstance(response, dict):
         raise TypeError('Ответ API отличен от словаря')
     try:
@@ -73,8 +74,8 @@ def check_response(response):
         logger.error(f'Ошибка доступа по ключу homeworks: {e}')
         raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
     if len(homework_list) == 0:
-        logger.error('Список домашних работ пуст')
-        raise IndexError('Список домашних работ пуст')
+        logger.info('Ревьюер не взял на проверку')
+        raise IndexError('Ревьюер не взял на проверку')
     if not isinstance(homework_list, list):
         logger.error('Данные не читаемы')
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
