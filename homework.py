@@ -103,7 +103,7 @@ def parse_status(homework: Dict):
     verdict = HOMEWORK_STATUSES.get(homework_status)
     if verdict is None:
         msg = 'Неизвестный статус домашки'
-        raise exceptions.UnknownHWStatusException(msg)
+        raise exceptions.UnknownStatusHomeWork(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
