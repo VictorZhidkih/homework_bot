@@ -59,11 +59,10 @@ def get_api_answer(current_timestamp):
     params = {'from_date': timestamp}
     logger.info('Начали запрос к API')
     response = requests.get(
-        ENDPOINT, headers=HEADERS, params=params
-        )
+        ENDPOINT, headers=HEADERS, params=params)
     if response.status_code != HTTPStatus.OK:
         logger.error(f'{__name__}:Ошибка при запросе к основному API: '
-                f'{ENDPOINT}')
+                     f'{ENDPOINT}')
         raise requests.exceptions.ConnectionError
 
     return response.json()
