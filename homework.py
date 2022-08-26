@@ -71,7 +71,20 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверяем API на корректность."""
     logging.info('Проверяем ответ сервера')
-    homework_list = response.get('homeworks')
+    if not isinstance(response, dict):
+        try:
+            logger.debug(f'{__name__}: проверяем тип'
+                         f'данных response: {type(response)}')
+        except TypeError as err:
+            raise TypeError(f'Ответ API отличен от словаря: {err}')
+    try:
+        homework_list = response.get('homeworks')
+        current_date = response.get('current_date')
+    except KeyError as e:
+        raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
+    if not homework_list and  current_date:
+        logger.info('Ревьюер не взял на проверку')
+        raise exceptions.CriticalError('Ревьюер не взял на проверку')
     if not isinstance(homework_list, list):
         try:
             logger.debug(f'{__name__}: проверяем тип данных'
@@ -79,28 +92,6 @@ def check_response(response):
         except TypeError as err:
             logger.error(f'{__name__}: Неверный тип ключа: {err}')
             raise exceptions.IncorrectFormatResponse('Данные не читаемы')
-    # if not homework_list and  current_date:
-    # if not isinstance(response, dict):
-    #     try:
-    #         logger.debug(f'{__name__}: проверяем тип'
-    #                      f'данных response: {type(response)}')
-    #     except TypeError as err:
-    #         raise TypeError(f'Ответ API отличен от словаря: {err}')
-    # try:
-    #     homework_list = response.get('homeworks')
-    #     current_date = response.get('current_date')
-    # except KeyError as e:
-    #     raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
-    # if not homework_list and  current_date:
-    #     logger.info('Ревьюер не взял на проверку')
-    #     raise exceptions.CriticalError('Ревьюер не взял на проверку')
-    # if not isinstance(homework_list, list):
-    #     try:
-    #         logger.debug(f'{__name__}: проверяем тип данных'
-    #                      f'homework_list: {type(homework_list)}')
-    #     except TypeError as err:
-    #         logger.error(f'{__name__}: Неверный тип ключа: {err}')
-    #         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
 
     return homework_list
 
