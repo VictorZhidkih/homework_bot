@@ -71,7 +71,7 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверяем API на корректность."""
     logging.info('Проверяем ответ сервера')
-    if isinstance(response, dict):
+    if not isinstance(response, dict):
         try:
             logger.debug(f'{__name__}: проверяем тип'
                          f'данных response: {type(response)}')
@@ -79,12 +79,13 @@ def check_response(response):
             raise TypeError(f'Ответ API отличен от словаря: {err}')
     try:
         homework_list = response.get('homeworks')
+        current_date = response.get('current_date')
     except KeyError as e:
         raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
-    if not homework_list:
+    if not homework_list and  current_date:
         logger.info('Ревьюер не взял на проверку')
-        raise IndexError('Ревьюер не взял на проверку')
-    if isinstance(homework_list, list):
+        raise exceptions.CriticalError('Ревьюер не взял на проверку')
+    if not isinstance(homework_list, list):
         try:
             logger.debug(f'{__name__}: проверяем тип данных'
                          f'homework_list: {type(homework_list)}')
@@ -144,7 +145,7 @@ def main():
                 logger.info('Статус не изменился')
             time.sleep(RETRY_TIME)
         except exceptions.NoTelegramError as error:
-            logger.error(f'Ошибки не отправляются в телеграм {error}')
+            logger.error(f'Критическая ошибка в работе бота {error}')
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
