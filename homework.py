@@ -100,7 +100,7 @@ def parse_status(homework: Dict):
         homework_status = homework['status']
     except KeyError as err:
         logger.error(f'Ошибка доступа по ключу {err}')
-    verdict = HOMEWORK_STATUSES[homework_status] 
+    verdict = HOMEWORK_STATUSES[homework_status]
     if verdict is None:
         msg = 'Неизвестный статус домашки'
         raise exceptions.UnknownStatusHomeWork(msg)
