@@ -57,17 +57,14 @@ def get_api_answer(current_timestamp):
     """Делает зпрос к API."""
     timestamp = current_timestamp
     params = {'from_date': timestamp}
-    try:
-        logger.info('Начали запрос к API')
-        response = requests.get(
-            ENDPOINT, headers=HEADERS, params=params
+    logger.info('Начали запрос к API')
+    response = requests.get(
+        ENDPOINT, headers=HEADERS, params=params
         )
-        response.get_statuse = HTTPStatus.OK
-    except requests.exceptions.ConnectionError:
+    if response.get_statuse != HTTPStatus.OK:
         logger.error(f'{__name__}:Ошибка при запросе к основному API: '
-                     f'{ENDPOINT}')
-        raise requests.exceptions.ConnectionError(
-            'Ошибка при запросе к основному API')
+                f'{ENDPOINT}')
+        raise requests.exceptions.ConnectionError
 
     return response.json()
 
