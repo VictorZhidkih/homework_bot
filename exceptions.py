@@ -17,4 +17,4 @@ class NoTelegramError(BaseException):
     """Ошибки которые не надо отправлять в ТГ."""
     
 class CriticalError(NoTelegramError):
-    """Критическая ошибка в работе робота."""
+    """Критическая ошибка в работе Бота."""
