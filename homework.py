@@ -61,7 +61,7 @@ def get_api_answer(current_timestamp):
     response = requests.get(
         ENDPOINT, headers=HEADERS, params=params
         )
-    if response.get_statuse != HTTPStatus.OK:
+    if response.status_code != HTTPStatus.OK:
         logger.error(f'{__name__}:Ошибка при запросе к основному API: '
                 f'{ENDPOINT}')
         raise requests.exceptions.ConnectionError
