@@ -1,19 +1,20 @@
 class SendMessageFailure(Exception):
-    """Ошибка отправк сообщени]"""
+    """Ошибка отправк сообщени."""
 
-    pass
 
 class FailureToGetAPI(Exception):
-    """Ошибка при подключении к API"""
+    """Ошибка при подключении к API."""
     
-    pass
 
 class UnknownStatusHomeWork(Exception):
-    """Неизвестный статус дз"""
+    """Неизвестный статус дз."""
     
-    pass
 
 class IncorrectFormatResponse(Exception):
-    """Некорректный формат данных"""
+    """Некорректный формат данных."""
     
-    pass
+class NoTelegramError(BaseException):
+    """Ошибки которые не надо отправлять в ТГ."""
+    
+class CriticalError(NoTelegramError):
+    """Критическая ошибка в работе робота."""
