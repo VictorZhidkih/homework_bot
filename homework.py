@@ -103,7 +103,7 @@ def parse_status(homework: Dict):
     verdict = HOMEWORK_STATUSES.get(homework_status)
     if verdict is None:
         msg = 'Неизвестный статус домашки'
-        raise exceptions.UnknownStatusHomeWork(msg)
+        logger.info(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -126,6 +126,7 @@ def main():
     while True:
         try:
             response = get_api_answer(current_timestamp)
+            print(response)
             try:
                 homework = check_response(response)
             except KeyError as e:
