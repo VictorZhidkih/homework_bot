@@ -4,6 +4,7 @@ import sys
 import time
 from logging import FileHandler, StreamHandler
 from typing import Dict
+from http import HTTPStatus
 
 import requests
 import telegram
@@ -61,6 +62,7 @@ def get_api_answer(current_timestamp):
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params
         )
+        response.get_statuse = HTTPStatus.OK
     except requests.exceptions.ConnectionError:
         logger.error(f'{__name__}:Ошибка при запросе к основному API: '
                      f'{ENDPOINT}')
