@@ -71,20 +71,7 @@ def get_api_answer(current_timestamp):
 def check_response(response):
     """Проверяем API на корректность."""
     logging.info('Проверяем ответ сервера')
-    if not isinstance(response, dict):
-        try:
-            logger.debug(f'{__name__}: проверяем тип'
-                         f'данных response: {type(response)}')
-        except TypeError as err:
-            raise TypeError(f'Ответ API отличен от словаря: {err}')
-    try:
-        homework_list = response.get('homeworks')
-        current_date = response.get('current_date')
-    except KeyError as e:
-        raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
-    if not homework_list and  current_date:
-        logger.info('Ревьюер не взял на проверку')
-        raise exceptions.CriticalError('Ревьюер не взял на проверку')
+    homework_list = response.get('homeworks')
     if not isinstance(homework_list, list):
         try:
             logger.debug(f'{__name__}: проверяем тип данных'
@@ -92,6 +79,28 @@ def check_response(response):
         except TypeError as err:
             logger.error(f'{__name__}: Неверный тип ключа: {err}')
             raise exceptions.IncorrectFormatResponse('Данные не читаемы')
+    # if not homework_list and  current_date:
+    # if not isinstance(response, dict):
+    #     try:
+    #         logger.debug(f'{__name__}: проверяем тип'
+    #                      f'данных response: {type(response)}')
+    #     except TypeError as err:
+    #         raise TypeError(f'Ответ API отличен от словаря: {err}')
+    # try:
+    #     homework_list = response.get('homeworks')
+    #     current_date = response.get('current_date')
+    # except KeyError as e:
+    #     raise KeyError(f'Ошибка доступа по ключу homeworks: {e}')
+    # if not homework_list and  current_date:
+    #     logger.info('Ревьюер не взял на проверку')
+    #     raise exceptions.CriticalError('Ревьюер не взял на проверку')
+    # if not isinstance(homework_list, list):
+    #     try:
+    #         logger.debug(f'{__name__}: проверяем тип данных'
+    #                      f'homework_list: {type(homework_list)}')
+    #     except TypeError as err:
+    #         logger.error(f'{__name__}: Неверный тип ключа: {err}')
+    #         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
 
     return homework_list
 
@@ -109,7 +118,7 @@ def parse_status(homework: Dict):
     verdict = HOMEWORK_STATUSES.get(homework_status)
     if verdict is None:
         msg = 'Неизвестный статус домашки'
-        raise exceptions.CriticalError(msg)
+        raise exceptions.UnknownHWStatusException(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
@@ -143,9 +152,10 @@ def main():
                 send_message(bot, message)
             else:
                 logger.info('Статус не изменился')
-            time.sleep(RETRY_TIME)
+                time.sleep(RETRY_TIME)
         except exceptions.NoTelegramError as error:
             logger.error(f'Критическая ошибка в работе бота {error}')
+            time.sleep(RETRY_TIME)
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
