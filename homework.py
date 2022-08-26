@@ -100,10 +100,10 @@ def parse_status(homework: Dict):
         homework_status = homework['status']
     except KeyError as err:
         logger.error(f'Ошибка доступа по ключу {err}')
-    verdict = HOMEWORK_STATUSES.get(homework_status)
+    verdict = HOMEWORK_STATUSES[homework_status] 
     if verdict is None:
         msg = 'Неизвестный статус домашки'
-        logger.info(msg)
+        raise exceptions.UnknownStatusHomeWork(msg)
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
