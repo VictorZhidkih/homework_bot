@@ -116,7 +116,8 @@ def main():
             try:
                 response = get_api_answer(current_timestamp)
             except Exception:
-                logger.error(f'Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.'
+                logger.error(f'Сбой в работе программы: '
+                             f'Эндпоинт {ENDPOINT} недоступен.'
                              f'Код ответа API: {response.status_code}'
                              f'{response.headers}, {response.params}')
             homework = check_response(response)
