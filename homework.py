@@ -115,9 +115,9 @@ def main():
             logger.info('Начали запрос к API')
             try:
                 response = get_api_answer(current_timestamp)
-                print (response.headers)
-            except:
-                logger.error(f'Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.')
+            except Exception:
+                logger.error(f'Сбой в работе программы: '
+                             f'Эндпоинт {ENDPOINT} недоступен.')
             current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
             if homework:
