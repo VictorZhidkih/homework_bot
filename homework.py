@@ -54,13 +54,15 @@ def get_api_answer(current_timestamp: int):
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != HTTPStatus.OK:
+            # Я не понимаю как мне залогировать параметры запроса
             raise ConnectionError(
-                'Возникла ошибка соединения! \
-                Проверьте Ваше подключение к интернету.'
+                'Возникла ошибка соединения!'
+                'Проверьте Ваше подключение к интернету.'
             )
-    except exceptions.FailureToGetAPI:
-        logger.error('Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.\
-            Код ответа API: {response.status_code}')
+    except exceptions.InvalidToken:
+        logger.error('Неправильный токен используется')
+        raise ValueError('Неправильный токен используется')
+    except Exception:
         raise ConnectionError(
             f'Не удалось подключиться к API{response.status_code}')
 
@@ -87,7 +89,7 @@ def parse_status(homework: dict):
     homework_status = homework.get('status')
     if not homework_name:
         raise KeyError(f'Ошибка доступа по ключу {homework_name}')
-    verdict = HOMEWORK_STATUSES.get(homework_status)
+    verdict = HOMEWORK_STATUSES[homework_status]
     if not verdict:
         raise KeyError('Нет статуса домашней работы')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -111,19 +113,18 @@ def main():
     while True:
         try:
             logger.info('Начали запрос к API')
-            response = get_api_answer(current_timestamp)
-            if not response:
-                logger.error('Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.\
-                             Код ответа API: {response.status_code}')
+            try:
+                response = get_api_answer(current_timestamp)
+                print (response.headers)
+            except:
+                logger.error(f'Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.')
             current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
-            if not homework:
-                logger.info('Домашних работ нет')
-            new_status = parse_status(homework)
+            if homework:
+                new_status = parse_status(homework)
+            logger.info('Домашних работ нет')
             if new_status != status:
-                status = new_status
-                message = new_status
-                send_message(bot, message)
+                send_message(bot, new_status)
             else:
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
