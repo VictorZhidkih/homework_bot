@@ -51,14 +51,16 @@ def get_api_answer(current_timestamp: int):
     timestamp = current_timestamp
     params = {'from_date': timestamp}
     try:
-        logger.info('Начали запрос к API')
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != HTTPStatus.OK:
-            logger.error('ConnectionError')
-            raise requests.exceptions.ConnectionError
+            raise ConnectionError(
+                'Возникла ошибка соединения! \
+                Проверьте Ваше подключение к интернету.'
+            )
     except exceptions.FailureToGetAPI:
-        logger.error('Не удалось подключиться к API{response.status_code}')
+        logger.error('Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.\
+            Код ответа API: {response.status_code}')
         raise ConnectionError(
             f'Не удалось подключиться к API{response.status_code}')
 
@@ -73,7 +75,7 @@ def check_response(response: dict):
     homework_list = response.get('homeworks')
     current_date = response.get('current_date')
     if not homework_list or not current_date:
-        raise exceptions.CriticalError('Ревьюер не взял на проверку')
+        raise exceptions.CriticalError('Отсутсвие ожидаемых ключей')
     if not isinstance(homework_list, list):
         raise exceptions.IncorrectFormatResponse('Данные не читаемы')
     return homework_list
@@ -84,9 +86,9 @@ def parse_status(homework: dict):
     homework_name = homework.get('homework_name')
     homework_status = homework.get('status')
     if not homework_name:
-        raise KeyError('Ошибка доступа по ключу')
+        raise KeyError(f'Ошибка доступа по ключу {homework_name}')
     verdict = HOMEWORK_STATUSES.get(homework_status)
-    if verdict is None:
+    if not verdict:
         raise KeyError('Нет статуса домашней работы')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -101,7 +103,6 @@ def main():
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
     status = None
-    privious_error = True
     if not check_tokens():
         msg = 'отсутствие обязательных переменных окружения во время '
         logger.critical(msg)
@@ -109,28 +110,28 @@ def main():
 
     while True:
         try:
+            logger.info('Начали запрос к API')
             response = get_api_answer(current_timestamp)
+            if not response:
+                logger.error('Сбой в работе программы: Эндпоинт {ENDPOINT} недоступен.\
+                             Код ответа API: {response.status_code}')
             current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
             if not homework:
-                logger.error(f'Ошибка доступа по ключу {homework}'
-                             f'{__name__}: не согли найти ключ')
-            new_status = homework[0].get('status')
+                logger.info('Домашних работ нет')
+            new_status = parse_status(homework)
             if new_status != status:
                 status = new_status
-                message = parse_status(homework[0])
+                message = new_status
                 send_message(bot, message)
             else:
-                logger.debug('Статус не изменился')
+                logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
-            logger.info({error})
+            logger.error(error)
 
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            privious_error = message
-            if privious_error:
-                privious_error = False
-                send_message(bot, message)
+            send_message(bot, message)
             logger.error(message)
         finally:
             time.sleep(RETRY_TIME)
