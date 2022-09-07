@@ -54,17 +54,20 @@ def get_api_answer(current_timestamp: int):
         response = requests.get(
             ENDPOINT, headers=HEADERS, params=params)
         if response.status_code != HTTPStatus.OK:
-            # Я не понимаю как мне залогировать параметры запроса
             raise ConnectionError(
                 'Возникла ошибка соединения!'
                 'Проверьте Ваше подключение к интернету.'
+                f'{response.status_code}, {response.reason},'
+                f'{response.text},{ENDPOINT},{HEADERS},'
+                f'{params}'
             )
     except exceptions.InvalidToken:
-        logger.error('Неправильный токен используется')
         raise ValueError('Неправильный токен используется')
     except Exception:
         raise ConnectionError(
-            f'Не удалось подключиться к API{response.status_code}')
+            f'Не удалось подключиться к API{response.status_code} '
+            f'{response.reason}, {response.text}, '
+            f'{ENDPOINT},{HEADERS},{params}')
 
     return response.json()
 
@@ -104,7 +107,7 @@ def main():
     """Основная логика работы бота."""
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
-    status = None
+    current_status = None
     if not check_tokens():
         msg = 'отсутствие обязательных переменных окружения во время '
         logger.critical(msg)
@@ -113,24 +116,26 @@ def main():
     while True:
         try:
             logger.info('Начали запрос к API')
-            try:
-                response = get_api_answer(current_timestamp)
-            except Exception:
-                logger.error(f'Сбой в работе программы: '
-                             f'Эндпоинт {ENDPOINT} недоступен.'
-                             f'Код ответа API: {response.status_code}'
-                             f'{response.headers}, {response.params}')
+            response = get_api_answer(current_timestamp)
+            current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
             if homework:
-                new_status = parse_status(homework)
+                new_status = parse_status[0](homework)
+            else:
+                logger.info('Домашних работ нет') 
             logger.info('Домашних работ нет')
-            if new_status != status:
+            new_status = parse_status[0](homework)
+            if new_status != current_status:
                 send_message(bot, new_status)
             else:
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
             logger.error(error)
-
+        except ConnectionError :
+            logger.error(
+                f'Не удалось подключиться к API{response.status_code} '
+                f'{response.reason}, {response.text}, '
+                f'{ENDPOINT},{HEADERS}')
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
