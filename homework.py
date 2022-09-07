@@ -117,12 +117,13 @@ def main():
         try:
             logger.info('Начали запрос к API')
             response = get_api_answer(current_timestamp)
+            print(response)
             current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
             if homework:
                 new_status = parse_status[0](homework)
             else:
-                logger.info('Домашних работ нет') 
+                logger.info('Домашних работ нет')
             logger.info('Домашних работ нет')
             new_status = parse_status[0](homework)
             if new_status != current_status:
@@ -131,7 +132,7 @@ def main():
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
             logger.error(error)
-        except ConnectionError :
+        except ConnectionError:
             logger.error(
                 f'Не удалось подключиться к API{response.status_code} '
                 f'{response.reason}, {response.text}, '
