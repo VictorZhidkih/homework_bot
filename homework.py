@@ -117,9 +117,8 @@ def main():
         try:
             logger.info('Начали запрос к API')
             response = get_api_answer(current_timestamp)
-            print(response)
-            current_timestamp = response.get('current_date', current_timestamp)
             homework = check_response(response)
+            current_timestamp = response.get('current_date', current_timestamp)
             if homework:
                 new_status = parse_status[0](homework)
             else:
