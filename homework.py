@@ -129,7 +129,7 @@ def main():
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
             logger.error(error)
-        except Exception as error:
+        except Exception:
             message = f'Не удалось подключиться к API{response.status_code} '
             f'{response.reason}, {response.text}, '
             f'{ENDPOINT},{HEADERS}'
