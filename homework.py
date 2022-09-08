@@ -92,7 +92,7 @@ def parse_status(homework: dict):
     homework_status = homework.get('status')
     if not homework_name:
         raise KeyError(f'Ошибка доступа по ключу {homework_name}')
-    verdict = HOMEWORK_STATUSES[homework_status]
+    verdict = HOMEWORK_STATUSES.get(homework_status)
     if not verdict:
         raise KeyError('Нет статуса домашней работы')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
@@ -129,9 +129,8 @@ def main():
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
             logger.error(error)
-        except Exception:
-            message = f'Не удалось подключиться к API{response.status_code} '
-            f'{response.reason}, {response.text}, '
+        except Exception as error:
+            message = f'{error}:Не удалось подключиться к API '
             f'{ENDPOINT},{HEADERS}'
             send_message(bot, message)
             logger.error(message)
