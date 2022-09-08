@@ -120,24 +120,19 @@ def main():
             homework = check_response(response)
             current_timestamp = response.get('current_date', current_timestamp)
             if homework:
-                new_status = parse_status[0](homework)
+                new_status = parse_status(homework[0])
             else:
                 logger.info('Домашних работ нет')
-            logger.info('Домашних работ нет')
-            new_status = parse_status[0](homework)
             if new_status != current_status:
                 send_message(bot, new_status)
             else:
                 logger.debug(f'Статус {homework} не изменился')
         except exceptions.NoTelegramError as error:
             logger.error(error)
-        except ConnectionError:
-            logger.error(
-                f'Не удалось подключиться к API{response.status_code} '
-                f'{response.reason}, {response.text}, '
-                f'{ENDPOINT},{HEADERS}')
         except Exception as error:
-            message = f'Сбой в работе программы: {error}'
+            message = f'Не удалось подключиться к API{response.status_code} '
+            f'{response.reason}, {response.text}, '
+            f'{ENDPOINT},{HEADERS}'
             send_message(bot, message)
             logger.error(message)
         finally:
