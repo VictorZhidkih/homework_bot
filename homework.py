@@ -130,8 +130,7 @@ def main():
         except exceptions.NoTelegramError as error:
             logger.error(error)
         except Exception as error:
-            message = f'{error}:Не удалось подключиться к API '
-            f'{ENDPOINT},{HEADERS}'
+            message = f'Сбой в работе программы: {error}'
             send_message(bot, message)
             logger.error(message)
         finally:
